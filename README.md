@@ -223,7 +223,11 @@ function explore_project(prjId, level) {
 }
 ```
 ## General API for query teamcity server
+<<<<<<< HEAD
 ```js
+=======
+```
+>>>>>>> f0a7126ce07cbed54884264edde595a0f510f5fb
 //Query TeamCity version
 client.queryTxt({uri:"version"})
     .then(function(txt){
