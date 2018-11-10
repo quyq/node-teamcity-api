@@ -149,7 +149,7 @@ client.projects.create()
 ```
 
 ## Builds
-The API provides a `builds` object to interact with Build Configurations.
+The API provides a `builds` object to interact with Build Jobs.
 
 ### teamcity.builds.get - Get a specific build
 ```js
@@ -191,3 +191,54 @@ client.builds.startBuild(buildNodeObject)
 ```
 
 Refer to the TeamCity REST API documentation for more info on what can be passed as a buildNode.
+
+## Build Configuration
+The API provides a `buildConfigurations` object to interact with Build Configurations.
+
+### teamcity.buildConfigurations.get - Get a specific buildConfiguration.
+Sample code for recursively browsering all buildConfiguration and print out associated template if available:
+```js
+function explore_project(prjId, level) {
+    client.projects.get({id: prjId}).then(function(prjObj) {
+        var space="", i;
+        for (i=0; i<level; i++) space+="    ";
+        for (i=0; i<prjObj.buildTypes.count; i++) {
+            console.log(space + "["+prjObj.buildTypes.buildType[i].name+"]");
+            //get buildConfiguration
+            client.buildConfigurations.get({id: prjObj.buildTypes.buildType[i].id})
+            .then(function(cfgObj){
+                if(cfgObj!=null)
+                    console.log(space + "  *"+cfgObj.name);});
+            //get buildConfiguration attached template
+            client.buildConfigurations.getAttachedTemplate({id: prjObj.buildTypes.buildType[i].id})
+            .then(function(attachedTpl){
+                if(attachedTpl!=null)
+                    console.log(space + "  T=>"+attachedTpl.name);});
+        }
+        for (i=0; i<prjObj.projects.count; i++) {
+            console.log(space + "project: "+prjObj.projects.project[i].name);
+            explore_project(prjObj.projects.project[i].id, level+1);
+        }
+    });
+}
+```
+## General API for query teamcity server
+```
+//Query TeamCity version
+client.queryTxt({uri:"version"})
+    .then(function(txt){
+        console.log("TC version is: "+txt)
+    });
+
+//Query TeamCity API version
+client.queryTxt({uri:"apiVersion"})
+    .then(function(txt){
+        console.log("API version is: "+txt)
+    });
+
+//Query queued builds
+client.queryXml({uri:"buildQueue"})
+    .then(function(xml){
+        console.log("buildQueue XML: "+xml)
+    });
+```
